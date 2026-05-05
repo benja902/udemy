@@ -1,9 +1,9 @@
-name: Monitor Udemy
+name: Monitor Udemy coupons
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "3,13,23,33,43,53 * * * *"
 
 concurrency:
   group: udemy-coupon-monitor
@@ -38,6 +38,12 @@ jobs:
 
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
+
+      - name: Log trigger context
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
 
       - name: Run monitor
         run: npm run monitor

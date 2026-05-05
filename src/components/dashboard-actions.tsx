@@ -55,6 +55,25 @@ export function DashboardActions() {
     }
   }
 
+  async function testTelegram() {
+    setState({ loading: true, message: "Enviando prueba a Telegram...", error: null });
+
+    try {
+      await postJson("/api/telegram/test");
+      setState({
+        loading: false,
+        message: "Mensaje de prueba enviado a Telegram.",
+        error: null,
+      });
+    } catch (error) {
+      setState({
+        loading: false,
+        message: null,
+        error: error instanceof Error ? error.message : "Error desconocido",
+      });
+    }
+  }
+
   async function addCourse(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formElement = event.currentTarget;
@@ -176,6 +195,14 @@ export function DashboardActions() {
           className="mt-3 h-10 w-full rounded-md bg-emerald-600 px-4 text-sm font-medium text-white disabled:cursor-wait disabled:bg-emerald-300"
         >
           Revisar ahora
+        </button>
+        <button
+          type="button"
+          onClick={testTelegram}
+          disabled={state.loading || isPending}
+          className="mt-2 h-10 w-full rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-800 disabled:cursor-wait disabled:text-zinc-400"
+        >
+          Probar Telegram
         </button>
         {state.message ? <p className="mt-3 text-sm text-emerald-700">{state.message}</p> : null}
         {state.error ? <p className="mt-3 text-sm text-red-700">{state.error}</p> : null}

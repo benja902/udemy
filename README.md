@@ -42,6 +42,7 @@ npm run dev
 - Agrega una fuente donde el profesor publica el cupón.
 - Agrega los cursos específicos de Udemy que quieres vigilar.
 - Pulsa `Revisar ahora`.
+- Pulsa `Probar Telegram` para validar el bot sin esperar un curso gratis.
 
 El verificador prueba URLs de este estilo:
 

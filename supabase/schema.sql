@@ -78,3 +78,41 @@ create table if not exists review_locks (
   acquired_at timestamptz not null default now(),
   expires_at timestamptz not null
 );
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'checks'
+  ) then
+    alter publication supabase_realtime add table public.checks;
+  end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'course_check_results'
+  ) then
+    alter publication supabase_realtime add table public.course_check_results;
+  end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'alerts'
+  ) then
+    alter publication supabase_realtime add table public.alerts;
+  end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'coupon_sources'
+  ) then
+    alter publication supabase_realtime add table public.coupon_sources;
+  end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'courses'
+  ) then
+    alter publication supabase_realtime add table public.courses;
+  end if;
+end $$;

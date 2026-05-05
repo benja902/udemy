@@ -1,5 +1,6 @@
 import { createSupabaseAdmin } from "@/lib/supabase";
 import { detectCoupon } from "@/lib/monitor/coupon-detector";
+import { verifyCourseFromSource } from "@/lib/monitor/source-course-verifier";
 import { sendTelegramMessage } from "@/lib/monitor/telegram";
 import { verifyUdemyCoupon } from "@/lib/monitor/udemy-verifier";
 import type { Coupon, CouponSource, Course, VerificationResult } from "@/lib/monitor/types";
@@ -208,7 +209,12 @@ export async function runMonitor(options: RunMonitorOptions): Promise<RunMonitor
         }
 
         for (const course of courses ?? []) {
-          const result = await verifyUdemyCoupon(course, coupon.code);
+          const result =
+            (await verifyCourseFromSource({
+              sourceUrl: source.source_url,
+              course,
+              couponCode: coupon.code,
+            })) ?? (await verifyUdemyCoupon(course, coupon.code));
           summary.checkedCourses += 1;
 
           await storeVerificationResult({

@@ -30,6 +30,15 @@ function classifyPage(text: string, finalPrice: number | null) {
   const lower = text.toLowerCase();
 
   if (
+    lower.includes("performing security verification") ||
+    lower.includes("security service to protect against malicious bots") ||
+    lower.includes("challenges.cloudflare.com") ||
+    lower.includes("performance and security by cloudflare")
+  ) {
+    return "error" as const;
+  }
+
+  if (
     finalPrice === 0 ||
     lower.includes("free") ||
     lower.includes("gratis") ||
@@ -55,6 +64,10 @@ function classifyPage(text: string, finalPrice: number | null) {
     lower.includes("aplicado")
   ) {
     return "discount" as const;
+  }
+
+  if (finalPrice === null) {
+    return "error" as const;
   }
 
   return "paid" as const;
@@ -90,6 +103,14 @@ export async function verifyUdemyCoupon(
     const finalPrice = parsePrice(compactText);
     const currency = parseCurrency(compactText);
     const status = classifyPage(compactText, finalPrice);
+    const securityVerificationMessage =
+      status === "error" && compactText.toLowerCase().includes("security verification")
+        ? "Udemy mostró verificación de seguridad/Cloudflare al navegador automatizado."
+        : undefined;
+    const missingPriceMessage =
+      status === "error" && !securityVerificationMessage && finalPrice === null
+        ? "No se detectó precio, cupón aplicado ni botón de inscripción en la página de Udemy."
+        : undefined;
 
     return {
       status,
@@ -97,6 +118,7 @@ export async function verifyUdemyCoupon(
       currency,
       detectedLabel: compactText.slice(0, 700),
       checkedUrl: page.url(),
+      errorMessage: securityVerificationMessage ?? missingPriceMessage,
     };
   } catch (error) {
     return {

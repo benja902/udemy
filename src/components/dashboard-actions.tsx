@@ -57,7 +57,8 @@ export function DashboardActions() {
 
   async function addCourse(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
 
     try {
       await postJson("/api/courses", {
@@ -65,7 +66,7 @@ export function DashboardActions() {
         udemy_url: form.get("udemy_url"),
         instructor_name: form.get("instructor_name"),
       });
-      event.currentTarget.reset();
+      formElement.reset();
       startTransition(() => router.refresh());
     } catch (error) {
       setState({
@@ -78,7 +79,8 @@ export function DashboardActions() {
 
   async function addSource(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
 
     try {
       await postJson("/api/sources", {
@@ -87,7 +89,7 @@ export function DashboardActions() {
         coupon_selector: form.get("coupon_selector"),
         coupon_regex: form.get("coupon_regex"),
       });
-      event.currentTarget.reset();
+      formElement.reset();
       startTransition(() => router.refresh());
     } catch (error) {
       setState({

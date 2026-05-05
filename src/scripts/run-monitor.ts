@@ -2,9 +2,13 @@ import { loadEnvConfig } from "@next/env";
 
 loadEnvConfig(process.cwd());
 
-const { runMonitor } = await import("@/lib/monitor/run-monitor");
+async function main() {
+  const { runMonitor } = await import("@/lib/monitor/run-monitor");
+  const summary = await runMonitor({ trigger: "cron" });
+  return summary;
+}
 
-runMonitor({ trigger: "cron" })
+main()
   .then((summary) => {
     console.log(JSON.stringify(summary, null, 2));
   })

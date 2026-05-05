@@ -125,7 +125,14 @@ function statusClass(status: string) {
 
 export default async function Home() {
   const data = await loadDashboardData();
-  const latestResultByCourse = new Map(data.results.map((result) => [result.course_id, result]));
+  const latestResultByCourse = new Map<string, DashboardData["results"][number]>();
+
+  for (const result of data.results) {
+    if (!latestResultByCourse.has(result.course_id)) {
+      latestResultByCourse.set(result.course_id, result);
+    }
+  }
+
   const currentCoupon = data.sources.find((source) => source.last_seen_coupon)?.last_seen_coupon;
 
   return (

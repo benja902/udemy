@@ -1,4 +1,8 @@
-import { runMonitor } from "@/lib/monitor/run-monitor";
+import { loadEnvConfig } from "@next/env";
+
+loadEnvConfig(process.cwd());
+
+const { runMonitor } = await import("@/lib/monitor/run-monitor");
 
 runMonitor({ trigger: "cron" })
   .then((summary) => {

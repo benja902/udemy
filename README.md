@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Monitor automático de cupones Udemy
 
-## Getting Started
+MVP para vigilar una lista cerrada de cursos Udemy de un profesor, detectar el cupón publicado en una o pocas fuentes, probarlo con Playwright y avisar por Telegram cuando un curso queda gratis.
 
-First, run the development server:
+## Stack
+
+- Next.js + TypeScript para dashboard y API.
+- Supabase Postgres para cursos, fuentes, cupones, revisiones y alertas.
+- Playwright para verificar el precio final en Udemy.
+- Telegram Bot API para notificaciones.
+
+## Configuración
+
+1. Crea un proyecto en Supabase.
+2. Ejecuta el SQL de `supabase/schema.sql` en el SQL editor de Supabase.
+3. Copia `.env.example` a `.env.local` y completa:
+
+```bash
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+```
+
+4. Instala Chromium para Playwright:
+
+```bash
+npm run playwright:install
+```
+
+5. Levanta el dashboard:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Uso
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Abre `http://localhost:3000`.
+- Agrega una fuente donde el profesor publica el cupón.
+- Agrega los cursos específicos de Udemy que quieres vigilar.
+- Pulsa `Revisar ahora`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+El verificador prueba URLs de este estilo:
 
-## Learn More
+```txt
+https://www.udemy.com/course/curso/?couponCode=CUPON
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Worker programado con GitHub Actions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+El proyecto incluye `.github/workflows/monitor.yml`, que ejecuta el monitor cada 30 minutos y también permite correrlo manualmente desde la pestaña `Actions` de GitHub.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+No necesitas deploy para esta fase: el dashboard puede correr localmente para cargar cursos y fuentes en Supabase, mientras GitHub Actions ejecuta el worker programado contra esa misma base.
 
-## Deploy on Vercel
+En GitHub, crea estos secrets en `Settings > Secrets and variables > Actions > New repository secret`:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```txt
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+TELEGRAM_BOT_TOKEN
+TELEGRAM_CHAT_ID
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Los secrets de Telegram son opcionales para guardar revisiones, pero necesarios para recibir alertas.
+
+Para probar localmente el worker:
+
+```bash
+npm run monitor
+```
+
+También puedes usar el endpoint del dashboard local o desplegado:
+
+```bash
+POST /api/check?secret=MONITOR_SECRET
+```
+
+Si `MONITOR_SECRET` está vacío, el endpoint queda abierto para uso local.
+
+## Flujo recomendado para esta fase
+
+1. Ejecuta `supabase/schema.sql` en Supabase.
+2. Crea `.env.local` con tus claves.
+3. Ejecuta `npm run dev`.
+4. Abre `http://localhost:3000` y registra fuentes/cursos.
+5. Pulsa `Revisar ahora` para validar que guarda resultados.
+6. Sube el repo a GitHub.
+7. Configura los secrets.
+8. Ejecuta el workflow manualmente una vez.
+9. Deja el cron activo cada 30 minutos.
+
+## Notas importantes
+
+- Este proyecto no busca cupones en internet ni hace scraping masivo.
+- Solo revisa las fuentes y cursos que registres.
+- Udemy puede cambiar layout, precios por región o mostrar bloqueos anti-bot; el sistema guarda estado `error` cuando no puede clasificar con confianza.

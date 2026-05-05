@@ -48,6 +48,60 @@ function parseSourcePrice(priceText: string | undefined) {
   };
 }
 
+function parseExpirationDate(expirationText: string | undefined) {
+  if (!expirationText || expirationText === "-") {
+    return null;
+  }
+
+  const numericMatch = expirationText.match(
+    /(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/,
+  );
+
+  if (numericMatch) {
+    const [, day, month, year, hour = "23", minute = "59"] = numericMatch;
+    return new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(hour),
+      Number(minute),
+    );
+  }
+
+  const spanishMonths: Record<string, number> = {
+    enero: 0,
+    febrero: 1,
+    marzo: 2,
+    abril: 3,
+    mayo: 4,
+    junio: 5,
+    julio: 6,
+    agosto: 7,
+    septiembre: 8,
+    setiembre: 8,
+    octubre: 9,
+    noviembre: 10,
+    diciembre: 11,
+  };
+
+  const textMatch = expirationText
+    .toLowerCase()
+    .match(/(\d{1,2})\s+de\s+([a-záéíóú]+)\s+(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+
+  if (!textMatch) {
+    return null;
+  }
+
+  const [, day, monthName, year, hour = "23", minute = "59"] = textMatch;
+  const month = spanishMonths[monthName.normalize("NFD").replace(/\p{Diacritic}/gu, "")];
+
+  if (month === undefined) {
+    return null;
+  }
+
+  return new Date(Number(year), month, Number(day), Number(hour), Number(minute));
+}
+
 async function getCodigo369AnonKey() {
   const html = await fetch(CODIGO369_URL, { cache: "no-store" }).then((response) =>
     response.text(),
@@ -115,13 +169,16 @@ export async function verifyCourseFromSource(params: {
   const couponMatches = sourceCoupon === couponCode.toUpperCase();
   const priceText = sourceCourse.precio_udemy ?? "";
   const etiquetas = sourceCourse.etiquetas ?? "";
+  const expiresAt = parseExpirationDate(sourceCourse.fechacaduca);
+  const isExpired = expiresAt ? expiresAt.getTime() < Date.now() : false;
   const isFree =
+    !isExpired &&
     couponMatches &&
     (priceText.toUpperCase().includes("GRATIS") || etiquetas.toLowerCase().includes("#gratis"));
   const { finalPrice, currency } = parseSourcePrice(priceText);
 
   return {
-    status: isFree ? "free" : couponMatches ? "discount" : "paid",
+    status: isExpired ? "expired_coupon" : isFree ? "free" : couponMatches ? "discount" : "paid",
     finalPrice: isFree ? 0 : finalPrice,
     currency: isFree ? null : currency,
     detectedLabel: [

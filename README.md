@@ -43,6 +43,7 @@ npm run dev
 - Agrega los cursos específicos de Udemy que quieres vigilar.
 - Pulsa `Revisar ahora`.
 - Pulsa `Probar Telegram` para validar el bot sin esperar un curso gratis.
+- Pulsa `Probar alerta gratis` para validar el formato y registro de una alerta de curso gratis.
 
 El verificador prueba URLs de este estilo:
 

@@ -74,6 +74,27 @@ export function DashboardActions() {
     }
   }
 
+  async function testFreeAlert() {
+    setState({ loading: true, message: "Enviando alerta gratis de prueba...", error: null });
+
+    try {
+      const response = await postJson("/api/alerts/test-free");
+      setState({
+        loading: false,
+        message: response.deduplicated
+          ? "Alerta de prueba ya registrada hoy; mensaje reenviado."
+          : "Alerta gratis de prueba enviada.",
+        error: null,
+      });
+    } catch (error) {
+      setState({
+        loading: false,
+        message: null,
+        error: error instanceof Error ? error.message : "Error desconocido",
+      });
+    }
+  }
+
   async function addCourse(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formElement = event.currentTarget;
@@ -203,6 +224,14 @@ export function DashboardActions() {
           className="mt-2 h-10 w-full rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-800 disabled:cursor-wait disabled:text-zinc-400"
         >
           Probar Telegram
+        </button>
+        <button
+          type="button"
+          onClick={testFreeAlert}
+          disabled={state.loading || isPending}
+          className="mt-2 h-10 w-full rounded-md border border-emerald-200 bg-emerald-50 px-4 text-sm font-medium text-emerald-800 disabled:cursor-wait disabled:text-emerald-300"
+        >
+          Probar alerta gratis
         </button>
         {state.message ? <p className="mt-3 text-sm text-emerald-700">{state.message}</p> : null}
         {state.error ? <p className="mt-3 text-sm text-red-700">{state.error}</p> : null}

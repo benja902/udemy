@@ -1,4 +1,4 @@
-name: Monitor Udemy coupons
+name: Monitor Udemy
 
 on:
   workflow_dispatch:

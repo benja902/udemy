@@ -83,6 +83,7 @@ Si `MONITOR_SECRET` está vacío, el endpoint queda abierto para uso local.
 ## Flujo recomendado para esta fase
 
 1. Ejecuta `supabase/schema.sql` en Supabase.
+   - Si ya ejecutaste el schema antes y solo quieres activar Realtime, ejecuta `supabase/realtime.sql`.
 2. Crea `.env.local` con tus claves.
 3. Ejecuta `npm run dev`.
 4. Abre `http://localhost:3000` y registra fuentes/cursos.

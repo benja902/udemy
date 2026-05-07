@@ -3,7 +3,7 @@ name: Monitor Udemy coupons
 on:
   workflow_dispatch:
   schedule:
-    - cron: "3,13,23,33,43,53 * * * *"
+    - cron: "3,33 * * * *" # Every hour at 3, 30, 33 and 53 minutes
 
 concurrency:
   group: udemy-coupon-monitor
